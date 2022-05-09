@@ -1,40 +1,65 @@
 {
-  "inputs": [
-    {
-      "id": "UI5MinVersionundefined",
-      "type": "command",
-      "command": "sap.ux.appGenerator.ui5Version",
-      "args": {}
-    }
-  ],
+  "version": "0.2.0",
   "configurations": [
     {
-      "name": "invoices",
-      "cwd": "${workspaceFolder}/invoices",
-      "runtimeArgs": [
-        "fiori",
-        "run"
-      ],
+      "name": "Invoices",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "npx",
+      "program": "${workspaceFolder}/Invoices/invoices-approuter/node_modules/@sap/html5-repo-mock/index.js",
       "args": [
-        "--open",
-        "Index.html"
+        "--standalone",
+        "/nsHTML5Module/index.html",
+        "--ui5",
+        "{\"version\":\".\"}"
       ],
-      "windows": {
-        "runtimeExecutable": "npx.cmd"
-      },
-      "console": "internalConsole",
-      "internalConsoleOptions": "openOnSessionStart",
-      "outputCapture": "std",
+      "cwd": "${workspaceFolder}/Invoices/HTML5Module",
       "env": {
-        "run.config": "{\"handlerId\":\"fiori_tools\",\"runnableId\":\"/home/user/projects/invoices\"}",
-        "FIORI_TOOLS_BACKEND_CONFIG": "[{\"path\":\"/sap\",\"url\":\"http://localhost\"}]",
-        "FIORI_TOOLS_URL_PARAMS": "sap-ui-xx-viewCache=false"
-      }
+        "PORT": "6004",
+        "MOCK_LOOKUP_DIRS": "[\"webapp\"]",
+        "run.config": "{\"handlerId\":\"ui5_run_config_handler_id\",\"runnableId\":\"/home/user/projects/Invoices/HTML5Module\"}"
+      },
+      "envFile": "${workspaceFolder}/Invoices/HTML5Module/.env1",
+      "preLaunchTask": "Build Invoices"
+    },
+    {
+      "name": "Run Invoices-HTML5Module",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/Invoices/invoices-approuter/node_modules/@sap/html5-repo-mock/index.js",
+      "args": [
+        "--standalone",
+        "/nsHTML5Module/index.html",
+        "--ui5",
+        "{\"version\":\".\"}"
+      ],
+      "cwd": "${workspaceFolder}/Invoices/HTML5Module",
+      "env": {
+        "PORT": "6004",
+        "MOCK_LOOKUP_DIRS": "[\"webapp\"]",
+        "run.config": "{\"handlerId\":\"ui5_run_config_handler_id\",\"runnableId\":\"/home/user/projects/Invoices/HTML5Module\"}"
+      },
+      "envFile": "${workspaceFolder}/Invoices/HTML5Module/.env2",
+      "preLaunchTask": "Build Invoices"
+    },
+    {
+      "name": "Run Invoices",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/Invoices/invoices-approuter/node_modules/@sap/html5-repo-mock/index.js",
+      "args": [
+        "--standalone",
+        "/nsHTML5Module/index.html",
+        "--ui5",
+        "{\"version\":\".\"}"
+      ],
+      "cwd": "${workspaceFolder}/Invoices/HTML5Module",
+      "env": {
+        "PORT": "6004",
+        "MOCK_LOOKUP_DIRS": "[\"webapp\"]",
+        "run.config": "{\"handlerId\":\"ui5_run_config_handler_id\",\"runnableId\":\"/home/user/projects/Invoices/HTML5Module\"}"
+      },
+      "envFile": "${workspaceFolder}/Invoices/HTML5Module/.env3",
+      "preLaunchTask": "Build Invoices"
     }
-  ],
-  "compounds": [],
-  "version": "0.2.0"
+  ]
 }
