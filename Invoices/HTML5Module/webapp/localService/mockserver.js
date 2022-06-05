@@ -1,9 +1,19 @@
+//@ts-nocheck
 sap.ui.define([
     "sap/ui/core/util/MockServer",
     "sap/ui/model/json/JSONModel",
     "sap/base/util/UriParameters",
     "sap/base/Log"
-], function (MockServer, JSONModel, UriParameters, Log) {
+
+],
+/**
+ * 
+ * @param {typeof sap.ui.core.util.MockServer } MockServer 
+ * @param {typeof sap.ui.model.json.JSONModel } JSONModel 
+ * @param {typeof sap.base.util.UriParameters } UriParameters 
+ * @param {typeof sap.base.Log } Log 
+ */
+function (MockServer, JSONModel, UriParameters, Log) {
     "use strict";
 
     var oMockServer,
@@ -13,103 +23,121 @@ sap.ui.define([
     var oMockServerInterface = {
 
         /**
-         * Initializes the mock server asynchronously.
-         * You can configure the delay with the URL parameter "serverDelay".
-         * The local mock data in this folder is returned instead of the real data for testing.
+         * inicializando el servidor mock de forma asincrona
          * @protected
-         * @param {object} [oOptionsParameter] init parameters for the mockserver
-         * @returns{Promise} a promise that is resolved when the mock server has been started
+         * @param {object} oOptionsParameter
+         * @returns {Promise} una promesa que ha sido resuelta 
+         *                    cuando ha arrancado el servidor mock
          */
-        init : function (oOptionsParameter) {
-            var oOptions = oOptionsParameter || {};
 
-            return new Promise(function(fnResolve, fnReject) {
+         init: function (oOptionsParameter){
+            var oOptions  = oOptionsParameter || {};
+
+            return new Promise (function (fnResolve, fnReject){
                 var sManifestUrl = sap.ui.require.toUrl(_sAppPath + "manifest.json"),
                     oManifestModel = new JSONModel(sManifestUrl);
 
-                oManifestModel.attachRequestCompleted(function ()  {
-                    var oUriParameters = new UriParameters(window.location.href),
-                        // parse manifest for local metatadata URI
-                        sJsonFilesUrl = sap.ui.require.toUrl(_sJsonFilesPath),
-                        oMainDataSource = oManifestModel.getProperty("/sap.app/dataSources/mainService"),
-                        sMetadataUrl = sap.ui.require.toUrl(_sAppPath + oMainDataSource.settings.localUri),
-                        // ensure there is a trailing slash
-                        sMockServerUrl = oMainDataSource.uri && new URI(oMainDataSource.uri).absoluteTo(sap.ui.require.toUrl(_sAppPath)).toString();
+                    oManifestModel.attachRequestCompleted(function(){
+                        var oUriParameters = new UriParameters (window.location.href);
+                        
+                        //analisis del manifest en busqueda del uri del metadata
+                        var  sJsonFileUrl = sap.ui.require.toUrl(_sJsonFilesPath);
+                        var oMainDataSource = oManifestModel.getProperty("/sap.app/dataSources/mainService");
+                        var sMetaDataUrl = sap.ui.require.toUrl(_sAppPath + oMainDataSource.settings.localUri);
 
-                    // create a mock server instance or stop the existing one to reinitialize
-                    if (!oMockServer) {
-                        oMockServer = new MockServer({
-                            rootUri: sMockServerUrl
+                        // aseguramiento de que hay un barra al final de la url
+
+                        var sMockServerUrl = oMainDataSource.uri && new URI(oMainDataSource.uri).absoluteTo(sap.ui.require.toUrl(_sAppPath)).toString();
+                        
+                        // creacion del servidor mock o detencion del existente a reinicializarse
+
+                        if(!oMockServer){
+                            oMockServer = new MockServer ({
+                                rootUri : sMockServerUrl
+
+                            });
+
+                        }else{
+                            oMockServer.stop();
+
+                        }
+
+                        //configurar el mock server con las optiones de dadas o por defecto con un delay de 0.5seg
+                        MockServer.config({
+
+                            autoRespond : true,
+                            autoRespondAfter : (oOptions.delay || oUriParameters.get("ServerDelay") || 500 )
+
                         });
-                    } else {
-                        oMockServer.stop();
-                    }
 
-                    // configure mock server with the given options or a default delay of 0.5s
-                    MockServer.config({
-                        autoRespond : true,
-                        autoRespondAfter : (oOptions.delay || oUriParameters.get("serverDelay") || 500)
-                    });
+                        // simulacion de las peticiones usando los datos mock
+                        oMockServer.simulate( sMetaDataUrl , {
+                            sMockdataBaseUrl : sJsonFileUrl,
+                            bGenerateMissingMockData : true
 
-                    // simulate all requests using mock data
-                    oMockServer.simulate(sMetadataUrl, {
-                        sMockdataBaseUrl : sJsonFilesUrl,
-                        bGenerateMissingMockData : true
-                    });
+                        });
 
-                    var aRequests = oMockServer.getRequests();
+                        var aRequests = oMockServer.getRequests();
 
-                    // compose an error response for each request
-                    var fnResponse = function (iErrCode, sMessage, aRequest) {
-                        aRequest.response = function(oXhr){
-                            oXhr.respond(iErrCode, {"Content-Type": "text/plain;charset=utf-8"}, sMessage);
+                        // creacion de una respuesta de error para cada peticion
+
+                        var fnResponse = function (iErrCode, Smessage, aRequests) {
+                            aRequests.response = function (oXhr) {
+
+                                oXhr.respond(iErrCode, {"content-type" : "text/plain;chartset= utf-8"},Smessage );
+                            };
+
                         };
-                    };
 
-                    // simulate metadata errors
-                    if (oOptions.metadataError || oUriParameters.get("metadataError")) {
-                        aRequests.forEach(function (aEntry) {
-                            if (aEntry.path.toString().indexOf("$metadata") > -1) {
-                                fnResponse(500, "metadata Error", aEntry);
-                            }
-                        });
-                    }
+                        //simular los metadata errors
 
-                    // simulate request errors
-                    var sErrorParam = oOptions.errorType || oUriParameters.get("errorType"),
-                        iErrorCode = sErrorParam === "badRequest" ? 400 : 500;
-                    if (sErrorParam) {
-                        aRequests.forEach(function (aEntry) {
-                            fnResponse(iErrorCode, sErrorParam, aEntry);
-                        });
-                    }
+                        if(oOptions.metadataError || oUriParameters.get("metadataError")){
+                            aRequests.forEach(function (aEntry) {
+                                if(aEntry.path.toString().indexoff("$metadata") > -1 ){
+                                    fnResponse (500, "metada Error", aEntry);
 
-                    // custom mock behaviour may be added here
+                                }
+                            });
+                                
+                            
+                        };
 
-                    // set requests and start the server
-                    oMockServer.setRequests(aRequests);
-                    oMockServer.start();
+                        //simulacion de los errores de peticiones
 
-                    Log.info("Running the app with mock data");
-                    fnResolve();
-                });
+                        var sErrorParam = oOptions.errorType || oUriParameters.get("errorType");
+                        var iErrorCode = sErrorParam === "badRequest" ? 400 : 500;
 
-                oManifestModel.attachRequestFailed(function () {
-                    var sError = "Failed to load application manifest";
+                        if(sErrorParam){
+                            aRequests.forEach(function (aEntry) {
+                                fnResponse (iErrorCode, sErrorParam, aEntry );
+                                
+                            });
+                        };
 
-                    Log.error(sError);
-                    fnReject(new Error(sError));
-                });
+                        //establecer respuestas y arrancar el servidor
+
+                        oMockServer.setRequests(aRequests);
+                        oMockServer.start();
+                        Log.info("Running de app with mock data");
+                        fnResolve();
+
+
+
+                    });
+
+                    oManifestModel.attachRequestFailed(function(){
+                        var sError = "Failed to load the aplication manifest";
+
+                        Log.error(sError);
+                        fnReject(new Error (sError));
+
+
+                    });
+
             });
-        },
 
-        /**
-         * @public returns the mockserver of the app, should be used in integration tests
-         * @returns {sap.ui.core.util.MockServer} the mockserver instance
-         */
-        getMockServer : function () {
-            return oMockServer;
-        }
+         }
+
     };
 
     return oMockServerInterface;

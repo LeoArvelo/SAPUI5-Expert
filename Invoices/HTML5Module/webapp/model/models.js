@@ -6,11 +6,20 @@ sap.ui.define([
 
 	return {
 
-		createDeviceModel: function () {
+        createDeviceModel: function () {
 			var oModel = new JSONModel(Device);
 			oModel.setDefaultBindingMode("OneWay");
 			return oModel;
-		}
+		},
+
+        createRecipient: function() {
+            let oData = {
+           recipient: {
+               name:"world asdasdasdasd"
+           }
+       };   
+       return new JSONModel(oData);
+           }
 
 	};
 });

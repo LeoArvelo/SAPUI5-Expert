@@ -1,0 +1,40 @@
+<mvc:View
+controllerName="ns.HTML5Module.controller.HelloPanel"
+xmlns="sap.m" 
+xmlns:mvc="sap.ui.core.mvc"
+xmlns:core="sap.ui.core" 
+displayBlock="true"
+>
+
+<Panel id="panel1" 
+       headerText="{i18n>titulopanel}" 
+       class="sapUiResponsiveMargin"
+       width="auto"
+       expandable="{device>/system/phone}"
+       expanded="{= !${device>/system/phone}}"
+       accessibleRole="Region">
+    <content>
+        <Button id="button2" 
+                icon="sap-icon://action"
+                text="{i18n>helloDialogBut}" 
+                press="onOpenDialog" 
+                class="sapUiSmallMarginEnd sapUiVisibleOnlyOnDesktop"/>
+        <Button id="button1" 
+                text="{i18n>showhellobutton}" 
+                press="onShowHello" 
+                class="sapUiSmallMarginEnd sapUiHideOnDesktop"/> 
+        <Input id="entrada" 
+            value="{/recipient/name}"
+            width="60%"
+            valueLiveUpdate="true"/>
+        <Text id="text1" text="Hello {/recipient/name}" class="sapUiSmallMargin boldeElements sapthemeHilight"/>
+    
+    </content>
+</Panel>
+
+
+<core:Fragment fragmentName="ns.HTML5Module.view.Form01"  type="XML"/>
+
+
+
+</mvc:View>

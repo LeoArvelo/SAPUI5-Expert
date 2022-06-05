@@ -1,0 +1,33 @@
+<mvc:View   controllerName="ns.HTML5Module.controller.App"
+            xmlns="sap.m" 
+            xmlns:mvc="sap.ui.core.mvc"
+            xmlns:core="sap.ui.core"
+            displayBlock="true">
+             
+    
+        
+    <Page title="{i18n>appTitle}" class="boldElements" >
+    <landmarkInfo>
+        <PageAccessibleLandmarkInfo rootRole="Region" 
+                                    rootLabel="{i18n>overviewRootLabel}"
+                                    contentRole="Main"
+                                    contentLabel="{i18n>overviewContentLabel}"
+                                    headerRole="Banner"
+                                    headerLabel="{i18n>overviewHeaderLabel}"/>
+    </landmarkInfo>
+        <headerContent>
+            <Button id="HellowDialogHeader"
+                    icon="sap-icon://action"
+                    press=".OpenDialogHeader"
+                    class="sapUiSmallMarginEnd"
+            />    
+        </headerContent>
+            <content>
+                <mvc:XMLView id="XMLView1" viewName="ns.HTML5Module.view.HelloPanel"/> 
+                <mvc:XMLView viewName="ns.HTML5Module.view.InvoicesList"/>    
+            </content>
+    </Page>
+       
+    
+    
+</mvc:View>
